@@ -1,6 +1,6 @@
 import argparse
-import time
 import math
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -8,7 +8,6 @@ from torch.autograd import Variable
 
 import data
 import model
-
 from utils import batchify, get_batch, repackage_hidden
 
 parser = argparse.ArgumentParser(description='PyTorch PennTreeBank RNN/LSTM Language Model')

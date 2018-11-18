@@ -1,6 +1,7 @@
 import argparse
 import time
 import math
+
 import numpy as np
 
 np.random.seed(331)
@@ -212,7 +213,7 @@ try:
             for prm in model.parameters():
                 prm.data = tmp[prm].clone()
 
-        if (len(best_val_loss) > args.nonmono and val_loss2 > min(best_val_loss[:-args.nonmono])):
+        if len(best_val_loss) > args.nonmono and val_loss2 > min(best_val_loss[:-args.nonmono]):
             print('Done!')
             import sys
 

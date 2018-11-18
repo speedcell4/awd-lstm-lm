@@ -2,12 +2,11 @@ from collections import defaultdict
 
 import torch
 import torch.nn as nn
-
 import numpy as np
 
 
 class SplitCrossEntropyLoss(nn.Module):
-    r'''SplitCrossEntropyLoss calculates an approximate softmax'''
+    r"""SplitCrossEntropyLoss calculates an approximate softmax"""
 
     def __init__(self, hidden_size, splits, verbose=False):
         # We assume splits is [0, split1, split2, N] where N >= |V|
@@ -160,7 +159,8 @@ class SplitCrossEntropyLoss(nn.Module):
                 # Then we calculate p(tombstone) * p(word in tombstone)
                 # Adding is equivalent to multiplication in log space
                 head_entropy = softmaxed_head_res[:, -idx]
-                # All indices are shifted - if the first split handles [0,...,499] then the 500th in the second split will be 0 indexed
+                # All indices are shifted - if the first split handles [0,...,499] then the 500th in
+                # the second split will be 0 indexed
                 indices = (split_targets[idx] - self.splits[idx]).view(-1, 1)
                 # Warning: if you don't squeeze, you get an N x 1 return, which acts oddly with broadcasting
                 tail_entropy = torch.gather(torch.nn.functional.log_softmax(tail_res, dim=-1), dim=1,
