@@ -16,7 +16,7 @@ parser.add_argument('--data', type=str, default='data/penn',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (LSTM, QRNN)')
-parser.add_argument('--save', type=str,default='best.pt',
+parser.add_argument('--save', type=str, default='best.pt',
                     help='model to use the pointer over')
 parser.add_argument('--cuda', action='store_false',
                     help='use CUDA')
@@ -38,7 +38,7 @@ corpus = data.Corpus(args.data)
 
 eval_batch_size = 1
 test_batch_size = 1
-#train_data = batchify(corpus.train, args.batch_size)
+# train_data = batchify(corpus.train, args.batch_size)
 val_data = batchify(corpus.valid, test_batch_size, args)
 test_data = batchify(corpus.test, test_batch_size, args)
 
@@ -49,12 +49,14 @@ test_data = batchify(corpus.test, test_batch_size, args)
 ntokens = len(corpus.dictionary)
 criterion = nn.CrossEntropyLoss()
 
+
 def one_hot(idx, size, cuda=True):
     a = np.zeros((1, size), np.float32)
     a[0][idx] = 1
     v = Variable(torch.from_numpy(a))
     if cuda: v = v.cuda()
     return v
+
 
 def evaluate(data_source, batch_size=10, window=args.window):
     # Turn on evaluation mode which disables dropout.
@@ -74,10 +76,13 @@ def evaluate(data_source, batch_size=10, window=args.window):
         ###
         # Fill pointer history
         start_idx = len(next_word_history) if next_word_history is not None else 0
-        next_word_history = torch.cat([one_hot(t.data[0], ntokens) for t in targets]) if next_word_history is None else torch.cat([next_word_history, torch.cat([one_hot(t.data[0], ntokens) for t in targets])])
-        #print(next_word_history)
-        pointer_history = Variable(rnn_out.data) if pointer_history is None else torch.cat([pointer_history, Variable(rnn_out.data)], dim=0)
-        #print(pointer_history)
+        next_word_history = torch.cat(
+            [one_hot(t.data[0], ntokens) for t in targets]) if next_word_history is None else torch.cat(
+            [next_word_history, torch.cat([one_hot(t.data[0], ntokens) for t in targets])])
+        # print(next_word_history)
+        pointer_history = Variable(rnn_out.data) if pointer_history is None else torch.cat(
+            [pointer_history, Variable(rnn_out.data)], dim=0)
+        # print(pointer_history)
         ###
         # Built-in cross entropy
         # total_loss += len(data) * criterion(output_flat, targets).data[0]
@@ -111,6 +116,7 @@ def evaluate(data_source, batch_size=10, window=args.window):
         next_word_history = next_word_history[-window:]
         pointer_history = pointer_history[-window:]
     return total_loss / len(data_source)
+
 
 # Load the best saved model.
 with open(args.save, 'rb') as f:

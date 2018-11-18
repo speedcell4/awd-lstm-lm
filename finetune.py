@@ -2,6 +2,7 @@ import argparse
 import time
 import math
 import numpy as np
+
 np.random.seed(331)
 import torch
 import torch.nn as nn
@@ -53,7 +54,7 @@ parser.add_argument('--cuda', action='store_false',
 parser.add_argument('--log-interval', type=int, default=200, metavar='N',
                     help='report interval')
 randomhash = ''.join(str(time.time()).split('.'))
-parser.add_argument('--save', type=str,  default=randomhash+'.pt',
+parser.add_argument('--save', type=str, default=randomhash + '.pt',
                     help='path to save the final model')
 parser.add_argument('--alpha', type=float, default=2,
                     help='alpha L2 regularization on RNN activation (alpha = 0 means no regularization)')
@@ -88,7 +89,8 @@ test_data = batchify(corpus.test, test_batch_size, args)
 ###############################################################################
 
 ntokens = len(corpus.dictionary)
-model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.dropouth, args.dropouti, args.dropoute, args.wdrop, args.tied)
+model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.dropouth,
+                       args.dropouti, args.dropoute, args.wdrop, args.tied)
 if args.cuda:
     model.cuda()
 total_params = sum(x.size()[0] * x.size()[1] if len(x.size()) > 1 else x.size()[0] for x in model.parameters())
@@ -96,6 +98,7 @@ print('Args:', args)
 print('Model total parameters:', total_params)
 
 criterion = nn.CrossEntropyLoss()
+
 
 ###############################################################################
 # Training code
@@ -162,9 +165,9 @@ def train():
             cur_loss = total_loss[0] / args.log_interval
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                    'loss {:5.2f} | ppl {:8.2f}'.format(
+                  'loss {:5.2f} | ppl {:8.2f}'.format(
                 epoch, batch, len(train_data) // args.bptt, optimizer.param_groups[0]['lr'],
-                elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
+                              elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
             total_loss = 0
             start_time = time.time()
         ###
@@ -176,16 +179,15 @@ def train():
 with open(args.save, 'rb') as f:
     model = torch.load(f)
 
-
 # Loop over epochs.
 lr = args.lr
 stored_loss = evaluate(val_data)
 best_val_loss = []
 # At any point you can hit Ctrl + C to break out of training early.
 try:
-    #optimizer = torch.optim.ASGD(model.parameters(), lr=args.lr, weight_decay=args.wdecay)
+    # optimizer = torch.optim.ASGD(model.parameters(), lr=args.lr, weight_decay=args.wdecay)
     optimizer = torch.optim.ASGD(model.parameters(), lr=args.lr, t0=0, lambd=0., weight_decay=args.wdecay)
-    for epoch in range(1, args.epochs+1):
+    for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train()
         if 't0' in optimizer.param_groups[0]:
@@ -197,8 +199,8 @@ try:
             val_loss2 = evaluate(val_data)
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-                    'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                               val_loss2, math.exp(val_loss2)))
+                  'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
+                                             val_loss2, math.exp(val_loss2)))
             print('-' * 89)
 
             if val_loss2 < stored_loss:
@@ -210,12 +212,13 @@ try:
             for prm in model.parameters():
                 prm.data = tmp[prm].clone()
 
-        if (len(best_val_loss)>args.nonmono and val_loss2 > min(best_val_loss[:-args.nonmono])):
+        if (len(best_val_loss) > args.nonmono and val_loss2 > min(best_val_loss[:-args.nonmono])):
             print('Done!')
             import sys
+
             sys.exit(1)
             optimizer = torch.optim.ASGD(model.parameters(), lr=args.lr, t0=0, lambd=0., weight_decay=args.wdecay)
-            #optimizer.param_groups[0]['lr'] /= 2.
+            # optimizer.param_groups[0]['lr'] /= 2.
         best_val_loss.append(val_loss2)
 
 except KeyboardInterrupt:
@@ -225,7 +228,7 @@ except KeyboardInterrupt:
 # Load the best saved model.
 with open(args.save, 'rb') as f:
     model = torch.load(f)
-    
+
 # Run on test data.
 test_loss = evaluate(test_data, test_batch_size)
 print('=' * 89)
